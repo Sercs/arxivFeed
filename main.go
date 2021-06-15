@@ -21,7 +21,7 @@ func main() {
 	// see https://arxiv.org/help/api/user-manual for options
 	// Note: You'd have to change the URL below for different query types
 	queries := [...]string{"cat:q-bio.NC", "cat:cs.CV", "cat:cs.LG", "cat:cs.AI", "cat:cs.SI"}
-	maxResults := "50" // query how many?
+	maxResults := "25" // query how many?
 
 	// Intialise LaTeX Document
 	var document = `
@@ -43,19 +43,6 @@ func main() {
 		resp, err := fp.ParseURL(URL)
 		if err != nil {
 			log.Fatal(err)
-		}
-
-		// Display articles for debugging purposes
-		for i, article := range resp.Items {
-			fmt.Println("Article: ", i)
-			fmt.Println(article.Title)
-			fmt.Println(cleanForLatex(article.Description))
-			for _, author := range article.Authors {
-				fmt.Print(author.Name, " ")
-			}
-			fmt.Println("")
-			fmt.Println(article.Updated)
-			fmt.Println(article.Link)
 		}
 
 		document = document + `\section{` + query + `}`
@@ -85,11 +72,12 @@ func main() {
 func formatLatex(resp *gofeed.Feed, document string) string {
 
 	// Loop through all returned articles
-	for _, article := range resp.Items {
-
+	for i, article := range resp.Items {
+		fmt.Println("Article: ", i)
+		fmt.Println(article.Title)
 		// filter for today and remove articles which I haven't figured out how to format (i.e. $'s)
-		if filterDate(article) && lazyRemove(article) {
-
+		if lazyRemove(article) {
+			fmt.Println("Pass")
 			// Fancy formatting
 			document = document + `\subsection{` + article.Title + `}`
 			document = document + `{\scriptsize \textit{Published: ` + cleanDate(article.Published)
@@ -112,6 +100,8 @@ func formatLatex(resp *gofeed.Feed, document string) string {
 			document = document + `\textbf{\footnotesize ` + authors + `}`
 			document = document + `\end{flushright}`
 			document = document + `\normalsize`
+		} else {
+			fmt.Println("Fail")
 		}
 	}
 	return document
@@ -140,6 +130,9 @@ func cleanForLatex(s string) string {
 	s = strings.ReplaceAll(s, "%", "\\%")
 	s = strings.ReplaceAll(s, "&", "\\&")
 	s = strings.ReplaceAll(s, "_", "\\_")
+	s = strings.ReplaceAll(s, "~", "$\\sim$")
+	s = strings.ReplaceAll(s, "\\textcolor{black}", "")
+	s = strings.ReplaceAll(s, "\\mu", "$\\mu$")
 	return s
 }
 
