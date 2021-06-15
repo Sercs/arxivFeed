@@ -76,7 +76,7 @@ func formatLatex(resp *gofeed.Feed, document string) string {
 		fmt.Println("Article: ", i)
 		fmt.Println(article.Title)
 		// filter for today and remove articles which I haven't figured out how to format (i.e. $'s)
-		if lazyRemove(article) {
+		if lazyRemove(article) || filterDate(article) {
 			fmt.Println("Pass")
 			// Fancy formatting
 			document = document + `\subsection{` + article.Title + `}`
