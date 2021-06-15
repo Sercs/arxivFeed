@@ -126,7 +126,7 @@ func lazyRemove(article *gofeed.Item) bool {
 	}
 }
 
-// Filter for today's content (technically yesterday)
+// Filter for today's content (technically yesterday because time-zones)
 func filterDate(article *gofeed.Item) bool {
 	if cleanDate(article.Updated) == time.Now().Local().AddDate(0, 0, -1).Format("2006-01-02") {
 		return true
