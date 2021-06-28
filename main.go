@@ -15,7 +15,7 @@ func main() {
 
 	// Key variables
 	docName := time.Now().Local().Format("02-01-2006") // save as?
-	savePath := "feed/"                                // save where?
+	savePath := ""                                     // save where?
 
 	// query what?
 	// see https://arxiv.org/help/api/user-manual for options
@@ -27,6 +27,8 @@ func main() {
 	var document = `
 	\documentclass{article}
 	\usepackage{hyperref}
+	\usepackage[utf8]{inputenc}
+	\usepackage[T1]{fontenc}
 	\title{Article Feed}
 	\begin{document}
 	\maketitle
@@ -76,10 +78,10 @@ func formatLatex(resp *gofeed.Feed, document string) string {
 		fmt.Println("Article: ", i)
 		fmt.Println(article.Title)
 		// filter for today and remove articles which I haven't figured out how to format (i.e. $'s)
-		if lazyRemove(article) || filterDate(article) {
+		if lazyRemove(article) {
 			fmt.Println("Pass")
 			// Fancy formatting
-			document = document + `\subsection{` + article.Title + `}`
+			document = document + `\subsection{` + cleanForLatex(article.Title) + `}`
 			document = document + `{\scriptsize \textit{Published: ` + cleanDate(article.Published)
 			document = document + `}}\\`
 			document = document + cleanForLatex(article.Description)
@@ -127,12 +129,17 @@ func filterDate(article *gofeed.Item) bool {
 
 // Clean abstracts for LaTeX format
 func cleanForLatex(s string) string {
+	s = strings.ReplaceAll(s, "\\%", "")
 	s = strings.ReplaceAll(s, "%", "\\%")
 	s = strings.ReplaceAll(s, "&", "\\&")
 	s = strings.ReplaceAll(s, "_", "\\_")
+	s = strings.ReplaceAll(s, "^", "\\^")
 	s = strings.ReplaceAll(s, "~", "$\\sim$")
 	s = strings.ReplaceAll(s, "\\textcolor{black}", "")
 	s = strings.ReplaceAll(s, "\\mu", "$\\mu$")
+	s = strings.ReplaceAll(s, "\\alpha", "$\\alpha$")
+	s = strings.ReplaceAll(s, "\\cite", "")
+
 	return s
 }
 
